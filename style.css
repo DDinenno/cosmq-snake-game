@@ -1,0 +1,182 @@
+:root {
+  --black: hsla(0, 0%, 0%, 1);
+  --oxford-blue: hsla(221, 51%, 16%, 1);
+  --orange-web: hsla(37, 98%, 53%, 1);
+  --platinum: hsla(0, 0%, 90%, 1);
+  --white: hsla(0, 0%, 100%, 1);
+
+  --primary: rgb(7, 11, 20);
+  --primary-light: hsla(221, 51%, 16%, 1);
+  --secondary: rgb(93, 78, 146);
+  --secondary-dark: rgb(80, 67, 128);
+  --accent: rgb(28, 240, 152);
+  --accent-dark: rgb(22, 190, 120);
+  --light: hsla(0, 0%, 90%, 1);
+  --light-transparent: hsla(0, 0%, 90%, 0.3);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  outline: 0;
+  box-sizing: border-box;
+  color: hsla(52, 94%, 94%, 1);
+}
+
+
+html,
+body {
+  margin: 0;
+}
+
+body {
+  min-height: 100vh;
+  background-size: cover;
+  background: linear-gradient(var(--primary), var(--primary-light)) no-repeat;
+  font-family:sans-serif;
+}
+
+
+#root {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.container {
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 30px 20px;
+  text-align: center;
+}
+
+h1,
+h2 {
+  width: 100%;
+  text-align: center;
+}
+
+h1 {
+  font-size: 3.2em;
+  font-weight: bold;
+  margin-bottom: 30px;
+  color: var(--accent);
+  font-family: 'Press Start 2P', 'Roboto';
+
+}
+
+h2 {
+  font-size: 2.1em;
+  font-weight: 300;
+  margin-top: 0;
+  color: var(--accent-dark);
+}
+
+p {
+  font-size: 1.5em;
+  color: var(--light);
+}
+
+a {
+  text-decoration: none;
+  color: var(--accent);
+}
+
+bold {
+  font-weight: bold;
+}
+
+button {
+  cursor: pointer;
+  background: var(--secondary-dark);
+  border: none;
+  height: 37px;
+  border-radius: 4px;
+  padding: 0px 15px;
+  color: var(--light);
+}
+
+button:hover {
+  background: var(--secondary);
+}
+
+button.alt {
+  background: var(--accent-dark);
+  color: var(--black)
+}
+
+button.alt:hover {
+  background: var(--accent);
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+li {
+  flex: 1 0 auto;
+  padding: 0 10px;
+}
+
+input {
+  padding: 10px;
+  border-radius: 5px;
+  background-color: var(--light-transparent);
+  border: solid 1px var(--secondary);
+  color: var(--accent);
+}
+
+.highlight {
+  color: var(--accent);
+  font-weight: bold;
+}
+
+footer {
+  margin-top: 20px;
+  padding: 20px 0;
+  text-align: center;
+}
+
+.text {
+  overflow: hidden;
+  /* width: auto; */
+  transition: max-width 3s ease-in-out;
+}
+
+.text.hide {
+  max-width: 0px;
+  transition: max-width 3s ease-in-out;
+}
+
+.text.show {
+  max-width: 9999px;
+  transition: max-width 3s ease-in-out;
+}
+
+table {
+  width: 100%;
+}
+
+table thead tr {
+  position: sticky;
+  top: 0px; 
+  background: var(--black)
+}
+
+table thead tr th{
+  height: 50px;
+  background-color: transparent;
+  color: var(--accent);
+  font-weight: bold;
+}
+
+table tr:nth-child(even) {
+  background-color: var(--primary-light);
+}
+
+
+
+

@@ -2,6 +2,8 @@
 
 This is an example website for <a href="https://github.com/DDinenno/cosmq-js">Cosmq JS</a>
 
+You can view an example here: [Code Sandbox](https://codesandbox.io/p/devbox/q4s9p8)
+
 ## getting started
 
 Clone this repo

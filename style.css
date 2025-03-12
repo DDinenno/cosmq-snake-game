@@ -33,7 +33,7 @@ body {
   min-height: 100vh;
   background-size: cover;
   background: linear-gradient(var(--primary), var(--primary-light)) no-repeat;
-  font-family:sans-serif;
+  font-family: sans-serif;
 }
 
 
@@ -121,12 +121,19 @@ li {
   padding: 0 10px;
 }
 
-input {
-  padding: 10px;
+input,
+select {
+  padding: 5px 10px;
   border-radius: 5px;
   background-color: var(--light-transparent);
   border: solid 1px var(--secondary);
   color: var(--accent);
+}
+
+select option {
+  background-color: white;
+  color: black;
+  font-size: 14px;
 }
 
 .highlight {
@@ -162,11 +169,11 @@ table {
 
 table thead tr {
   position: sticky;
-  top: 0px; 
+  top: 0px;
   background: var(--black)
 }
 
-table thead tr th{
+table thead tr th {
   height: 50px;
   background-color: transparent;
   color: var(--accent);
@@ -176,7 +183,3 @@ table thead tr th{
 table tr:nth-child(even) {
   background-color: var(--primary-light);
 }
-
-
-
-

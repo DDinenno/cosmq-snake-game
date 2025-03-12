@@ -1,10 +1,6 @@
 import Cosmq, { renderDOM, observe, compute, observableArray } from "cosmq-js";
 import { areOverlapping, nodesMatch, addNode } from "./utils.js";
 
-const gridSize = {
-  x: Math.floor(window.innerWidth / 30) - 1,
-  y: Math.floor(window.innerHeight / 30) - 3,
-};
 
 const STATES = {
   running: "running",
@@ -13,30 +9,30 @@ const STATES = {
   win: "win",
 };
 
-const getFoodPos = (exclude = []) => {
+const getFoodPos = (gridSize, exclude = []) => {
   const node = {
     x: Math.floor(Math.random() * gridSize.x),
     y: Math.floor(Math.random() * gridSize.y),
   };
 
   if (exclude.find((e) => nodesMatch(e, node))) {
-    return getFoodPos();
+    return getFoodPos(gridSize);
   }
 
   return node;
 };
 
-const Component_Food = ({ pos }) => {
+const Component_Food = ({ pos, size }) => {
   return (
     <span
       className="food"
       style={{
         background: "rgb(80, 67, 128)",
-        width: "30px",
-        height: "30px",
+        width: compute(`${size}px`),
+        height: compute(`${size}px`),
         position: "absolute",
-        left: compute(`${pos.x * 30}px`),
-        top: compute(`${pos.y * 30}px`),
+        left: compute(`${pos.x * size}px`),
+        top: compute(`${pos.y * size}px`),
         opacity: 0.8,
       }}
     />
@@ -47,37 +43,58 @@ const Component_App = ({}) => {
   const nodes = observe([]);
   const direction = observe({ x: 1, y: 0 });
   const frame = observe(1);
-  const foodPos = observe(getFoodPos());
+  const gridSize = observe({ x: 10, y: 10 });
+  const foodPos = observe(null);
   const state = observe(STATES.paused);
   const score = observe(0);
-  const maxNodes = gridSize.x * gridSize.y;
+  const maxNodes = compute(gridSize.x * gridSize.y);
+
+  const pixelSize = compute(() => {
+    let size = 30;
+
+    if (gridSize.x * size > window.innerWidth - 100) {
+      size = (window.innerWidth - 100) / gridSize.x;
+    }
+
+    if (gridSize.y * size > window.innerHeight - 100) {
+      size = (window.innerHeight - 100) / gridSize.y;
+    }
+
+    return size;
+  });
 
   const initialLoopTimeout = 150;
   let loopTimeout = initialLoopTimeout;
+
+  const resetGame = () => {
+    state = STATES.running;
+    score = 0;
+
+    direction = { x: 1, y: 0 };
+    foodPos = getFoodPos(gridSize, nodes);
+
+    nodes = [
+      {
+        x: 1,
+        y: 1,
+      },
+
+      {
+        x: 0,
+        y: 1,
+      },
+      {
+        x: 0,
+        y: 0,
+      },
+    ];
+  };
 
   window.addEventListener("keydown", (e) => {
     if (e.repeat) return;
 
     if (state !== STATES.running) {
-      state = STATES.running;
-      score = 0;
-
-      nodes = [
-        {
-          x: 1,
-          y: 1,
-        },
-
-        {
-          x: 0,
-          y: 1,
-        },
-        {
-          x: 0,
-          y: 0,
-        },
-      ];
-
+      resetGame();
       return;
     }
 
@@ -176,6 +193,7 @@ const Component_App = ({}) => {
         newNodes.find((b) => a !== b && a.x === b.x && a.y === b.y),
       )
     ) {
+      console.log(overlapping, newNodes);
       state = STATES.gameover;
       return;
     }
@@ -183,87 +201,119 @@ const Component_App = ({}) => {
     if (ateFood) {
       score = score + 1;
       newNodes.push({ x: -9999, y: -9999 });
-      foodPos = getFoodPos(nodes);
+      foodPos = getFoodPos(gridSize, nodes);
     }
 
     nodes = newNodes;
-
-    nodes.forEach((node) => {
-      const match = nodes.find((n) => node !== n && areOverlapping(node, n));
-      if (match) {
-        overlapping = true;
-      }
-    });
-
-    if (overlapping) {
-      state = STATES.gameover;
-    }
   });
 
   return (
-    <div className="container">
+    <div className="container" style={{ height: "100vh" }}>
       <div
         className="bg"
         style={{
           position: "absolute",
-          left: "0px",
-          top: "0px",
-          width: `${(gridSize.x + 1) * 30}px`,
-          height: `${(gridSize.y + 1) * 30}px`,
-          backgroundImage: `linear-gradient(to right, rgb(204 204 204 / 26%) 1px, transparent 1px),
-                            linear-gradient(to bottom, rgb(204 204 204 / 26%) 1px, transparent 1px)`,
-          backgroundSize: "30px 30px",
+          left: "50%",
+          top: "40%",
+          transform: "translateX(-50%) translateY(-40%)",
+          width: compute(`${(gridSize.x + 1) * pixelSize}px`),
+          height: compute(`${(gridSize.y + 1) * pixelSize}px`),
+          backgroundImage: `linear-gradient(to right, rgb(239 95 204 / 25%) 1px, transparent 1px),
+                            linear-gradient(to bottom, rgb(239 95 204 / 25%) 1px, transparent 1px)`,
+          backgroundSize: compute(`${pixelSize}px ${pixelSize}px`),
           boxSizing: "border-box",
-          boxShadow: "inset 0 0 0 2px rgb(204 204 204 / 26%)",
+          boxShadow:
+            "rgba(239, 95, 204, 0.55) 0px 0px 0px 3px, rgba(239, 95, 204, 0.55) 0px 0px 30px 0px",
         }}
-      ></div>
+      >
+        {compute(() => {
+          if (state === STATES.running) return "";
 
-      {compute(() => {
-        if (state === STATES.running) return "";
+          return (
+            <div
+              style={{
+                position: "absolute",
+                left: "50%",
+                top: "50%",
+                transform: "translateX(-50%) translateY(-50%)",
+              }}
+            >
+              <h1>
+                {state === STATES.win
+                  ? "You win, Congrats!"
+                  : state.toUpperCase()}
+              </h1>
 
-        return (
-          <div>
-            <h1>
-              {state === STATES.win
-                ? "You win, Congrats!"
-                : state.toUpperCase()}
-            </h1>
-            <span className="code">"Press any button to restart."</span>
-          </div>
-        );
-      })}
-      {observableArray(
-        nodes,
-        {
-          getKey: (item) => `${item.x}-${item.y}`,
-        },
+              <span className="code">
+                {state === STATES.paused
+                  ? "Press any button to start."
+                  : "Press any button to restart."}
+                <br />
+                <br />
+                {compute(
+                  state === STATES.paused ? "Use Arrow Keys to move." : null,
+                )}
+              </span>
+            </div>
+          );
+        })}
+        {observableArray(
+          nodes,
+          {
+            getKey: (item) => `${item.x}-${item.y}`,
+          },
 
-        (item, i) => (
-          <span
-            className="snake"
-            style={{
-              background: "rgb(28, 240, 152)",
-              width: "30px",
-              height: "30px",
-              position: "absolute",
-              left: compute(`${item.x * 30}px`),
-              top: compute(`${item.y * 30}px`),
-              opacity: 0.7,
-            }}
-          />
-        ),
-      )}
+          (item, i) => (
+            <span
+              className="snake"
+              style={{
+                background: "rgb(28, 240, 152)",
+                width: compute(`${pixelSize}px`),
+                height: compute(`${pixelSize}px`),
+                position: "absolute",
+                left: compute(`${item.x * pixelSize}px`),
+                top: compute(`${item.y * pixelSize}px`),
+                opacity: 0.7,
+              }}
+            />
+          ),
+        )}
 
-      {compute(
-        foodPos ? (
-          <span>
-            <Component_Food pos={foodPos} />
-          </span>
-        ) : null,
-      )}
-      <h4 style={{ position: "fixed", bottom: "20px", right: "20px" }}>
-        Score: {score}
-      </h4>
+        {compute(
+          foodPos ? (
+            <span>
+              <Component_Food pos={foodPos} size={pixelSize} />
+            </span>
+          ) : null,
+        )}
+      </div>
+      <div
+        style={{
+          display: "flex",
+          width: "100%",
+          justifyContent: "space-between",
+          placeItems: "anchor-center",
+          padding: "10px 20px",
+          position: "fixed",
+          bottom: "0px",
+          left: "0px",
+        }}
+      >
+        <select
+          handle:change={(e) => {
+            e.target.blur();
+            const [x, y] = e.target.value.split("x");
+            gridSize = { x: parseInt(x, 10), y: parseInt(y, 10) };
+            resetGame();
+          }}
+        >
+          {["10x10", "20x20", "30x30", "40x40", "50x50"].map((dimensions) => (
+            <option value={dimensions}>{dimensions}</option>
+          ))}
+        </select>
+
+        <h4>Score: {score}</h4>
+      </div>
     </div>
   );
 };

@@ -52,12 +52,12 @@ const Component_App = ({}) => {
   const pixelSize = compute(() => {
     let size = 30;
 
-    if (gridSize.x * size > window.innerWidth - 100) {
-      size = (window.innerWidth - 100) / gridSize.x;
+    if (gridSize.x * size > window.innerWidth - 60) {
+      size = (window.innerWidth - 60) / gridSize.x;
     }
 
-    if (gridSize.y * size > window.innerHeight - 100) {
-      size = (window.innerHeight - 100) / gridSize.y;
+    if (gridSize.y * size > window.innerHeight - 60) {
+      size = (window.innerHeight - 60) / gridSize.y;
     }
 
     return size;

@@ -268,11 +268,14 @@ const Component_App = ({}) => {
 
           return (
             <div
+              className="bg"
               style={{
                 position: "absolute",
                 left: "50%",
                 top: "50%",
                 transform: "translateX(-50%) translateY(-50%)",
+                background: "rgb(9 12 21 / 83%)",
+                padding: "20px",
               }}
             >
               <h1>

@@ -9,11 +9,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "cosmq-js": "0.0.6"
+    "cosmq-js": "0.0.8"
   },
   "devDependencies": {
     "babel-plugin-transform-equal-chain": "1.0.5",
-    "babel-preset-cosmq": "0.0.6",
+    "babel-preset-cosmq": "0.0.8",
     "vite": "4.4.5",
     "vite-plugin-babel": "1.1.3"
   }

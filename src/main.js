@@ -1,6 +1,6 @@
 import Cosmq, { renderDOM, observe, compute, observableArray } from "cosmq-js";
 import { areOverlapping, nodesMatch, addNode } from "./utils.js";
-
+import "../style.css";
 
 const STATES = {
   running: "running",
@@ -90,26 +90,24 @@ const Component_App = ({}) => {
     ];
   };
 
-  window.addEventListener("keydown", (e) => {
-    if (e.repeat) return;
-
+  const changeDirection = (dir) => {
     if (state !== STATES.running) {
       resetGame();
       return;
     }
 
     let newDirection;
-    switch (e.key) {
-      case "ArrowUp":
+    switch (dir) {
+      case "up":
         newDirection = { x: 0, y: -1 };
         break;
-      case "ArrowDown":
+      case "down":
         newDirection = { x: 0, y: 1 };
         break;
-      case "ArrowLeft":
+      case "left":
         newDirection = { x: -1, y: 0 };
         break;
-      case "ArrowRight":
+      case "right":
         newDirection = { x: 1, y: 0 };
         break;
     }
@@ -130,6 +128,45 @@ const Component_App = ({}) => {
 
       direction = newDirection;
     }
+  };
+
+  window.addEventListener("keydown", (e) => {
+    if (e.repeat) return;
+    changeDirection(e.key.replace(/^(Arrow)/, "").toLocaleLowerCase());
+  });
+
+  let touchStart = { x: 0, y: 0 };
+  let touchEnd = null;
+
+  const handleTouchEnd = () => {
+    if (touchEnd == null) return;
+
+    const deltaX = touchEnd.x - touchStart.x;
+    const deltaY = touchEnd.y - touchStart.y;
+
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      changeDirection(deltaX > 0 ? "right" : "left");
+    } else {
+      changeDirection(deltaY > 0 ? "down" : "up");
+    }
+
+    touchEnd = null;
+    window.removeEventListener("touchend", handleTouchEnd);
+  };
+
+  const handleTouchMove = (e) => {
+    const touch = e.touches[0];
+    touchEnd = { x: touch.clientX, y: touch.clientY };
+
+    window.removeEventListener("touchmove", handleTouchMove);
+  };
+
+  window.addEventListener("touchstart", (e) => {
+    const touch = e.touches[0];
+    touchStart = { x: touch.clientX, y: touch.clientY };
+
+    window.addEventListener("touchmove", handleTouchMove);
+    window.addEventListener("touchend", handleTouchEnd);
   });
 
   const loop = (cb) => {
@@ -246,12 +283,14 @@ const Component_App = ({}) => {
 
               <span className="code">
                 {state === STATES.paused
-                  ? "Press any button to start."
-                  : "Press any button to restart."}
+                  ? "Press any button or swipe finger to start."
+                  : "Press any button or swipe finger to restart."}
                 <br />
                 <br />
                 {compute(
-                  state === STATES.paused ? "Use Arrow Keys to move." : null,
+                  state === STATES.paused
+                    ? "Use Arrow Keys or swipe finger to move."
+                    : null,
                 )}
               </span>
             </div>

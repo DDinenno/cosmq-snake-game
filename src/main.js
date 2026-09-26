@@ -1,8 +1,9 @@
-import Cosmq, { renderDOM, observe, compute, observableArray } from "cosmq-js";
-import { areOverlapping, nodesMatch, addNode } from "./utils.js";
+import Cosmq, { renderDOM, observe, compute } from "cosmq-js";
+import { nodesMatch, addNode } from "./utils.js";
 import "../style.css";
 
 const STATES = {
+  reset: "reset",
   running: "running",
   gameover: "gameover",
   paused: "paused",
@@ -28,18 +29,19 @@ const Component_Food = ({ pos, size }) => {
       className="food"
       style={{
         background: "rgb(80, 67, 128)",
-        width: compute(`${size}px`),
-        height: compute(`${size}px`),
+        width: `${size}px`,
+        height: `${size}px`,
         position: "absolute",
-        left: compute(`${pos.x * size}px`),
-        top: compute(`${pos.y * size}px`),
+        left: `${pos.x * size}px`,
+        top: `${pos.y * size}px`,
         opacity: 0.8,
+        zIndex: -1
       }}
     />
   );
 };
 
-const Component_App = ({}) => {
+const Component_App = ({ }) => {
   const nodes = observe([]);
   const direction = observe({ x: 1, y: 0 });
   const frame = observe(1);
@@ -66,8 +68,11 @@ const Component_App = ({}) => {
   const initialLoopTimeout = 150;
   let loopTimeout = initialLoopTimeout;
 
+
+
   const resetGame = () => {
     state = STATES.running;
+
     score = 0;
 
     direction = { x: 1, y: 0 };
@@ -89,6 +94,7 @@ const Component_App = ({}) => {
       },
     ];
   };
+
 
   const changeDirection = (dir) => {
     if (state !== STATES.running) {
@@ -138,7 +144,8 @@ const Component_App = ({}) => {
   let touchStart = { x: 0, y: 0 };
   let touchEnd = null;
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = (e) => {
+    e.preventDefault();
     if (touchEnd == null) return;
 
     const deltaX = touchEnd.x - touchStart.x;
@@ -162,6 +169,7 @@ const Component_App = ({}) => {
   };
 
   window.addEventListener("touchstart", (e) => {
+    e.preventDefault()
     const touch = e.touches[0];
     touchStart = { x: touch.clientX, y: touch.clientY };
 
@@ -230,7 +238,6 @@ const Component_App = ({}) => {
         newNodes.find((b) => a !== b && a.x === b.x && a.y === b.y),
       )
     ) {
-      console.log(overlapping, newNodes);
       state = STATES.gameover;
       return;
     }
@@ -253,11 +260,11 @@ const Component_App = ({}) => {
           left: "50%",
           top: "40%",
           transform: "translateX(-50%) translateY(-40%)",
-          width: compute(`${(gridSize.x + 1) * pixelSize}px`),
-          height: compute(`${(gridSize.y + 1) * pixelSize}px`),
+          width: `${(gridSize.x + 1) * pixelSize}px`,
+          height: `${(gridSize.y + 1) * pixelSize}px`,
           backgroundImage: `linear-gradient(to right, rgb(239 95 204 / 25%) 1px, transparent 1px),
                             linear-gradient(to bottom, rgb(239 95 204 / 25%) 1px, transparent 1px)`,
-          backgroundSize: compute(`${pixelSize}px ${pixelSize}px`),
+          backgroundSize: `${pixelSize}px ${pixelSize}px`,
           boxSizing: "border-box",
           boxShadow:
             "rgba(239, 95, 204, 0.55) 0px 0px 0px 3px, rgba(239, 95, 204, 0.55) 0px 0px 30px 0px",
@@ -290,44 +297,50 @@ const Component_App = ({}) => {
                   : "Press any button or swipe finger to restart."}
                 <br />
                 <br />
-                {compute(
+                {
                   state === STATES.paused
                     ? "Use Arrow Keys or swipe finger to move."
-                    : null,
-                )}
+                    : null
+                }
               </span>
             </div>
           );
         })}
-        {observableArray(
-          nodes,
-          {
-            getKey: (item) => `${item.x}-${item.y}`,
-          },
 
-          (item, i) => (
+        {nodes.$map((item, i) => {
+          const backgroundColor = compute(() => {
+            let bg = `rgba(28, 240, 152, 0.5)`
+            if (i === 0) {
+              bg = `rgba(28, 240, 152, 0.9)`
+            } else if (i % 3 === 0) {
+              bg = `rgba(28, 240, 152, 0.6)`
+            }
+
+            return bg
+          })
+
+          return (
             <span
+              key={`${item.x}-${item.y}`}
               className="snake"
               style={{
-                background: "rgb(28, 240, 152)",
-                width: compute(`${pixelSize}px`),
-                height: compute(`${pixelSize}px`),
+                background: backgroundColor,
+                width: `${(item.width ?? 1) * pixelSize}px`,
+                height: `${(item.height ?? 1) * pixelSize}px`,
                 position: "absolute",
-                left: compute(`${item.x * pixelSize}px`),
-                top: compute(`${item.y * pixelSize}px`),
+                left: `${item.x * pixelSize}px`,
+                top: `${item.y * pixelSize}px`,
                 opacity: 0.7,
               }}
             />
-          ),
-        )}
+          )
+        })}
 
-        {compute(
-          foodPos ? (
-            <span>
-              <Component_Food pos={foodPos} size={pixelSize} />
-            </span>
-          ) : null,
-        )}
+        {foodPos ? (
+          <span>
+            <Component_Food pos={foodPos} size={pixelSize} />
+          </span>
+        ) : null}
       </div>
       <div
         style={{
@@ -344,9 +357,14 @@ const Component_App = ({}) => {
         <select
           handle:change={(e) => {
             e.target.blur();
+
+            state = STATES.paused;
             const [x, y] = e.target.value.split("x");
             gridSize = { x: parseInt(x, 10), y: parseInt(y, 10) };
-            resetGame();
+
+            setTimeout(() => {
+              resetGame();
+            }, 1000)
           }}
         >
           {["10x10", "20x20", "30x30", "40x40", "50x50"].map((dimensions) => (
@@ -356,7 +374,7 @@ const Component_App = ({}) => {
 
         <h4>Score: {score}</h4>
       </div>
-    </div>
+    </div >
   );
 };
 

@@ -21,6 +21,7 @@
   outline: 0;
   box-sizing: border-box;
   color: hsla(52, 94%, 94%, 1);
+  user-select: none;
 }
 
 

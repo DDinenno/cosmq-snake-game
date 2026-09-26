@@ -5,15 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "rm -rf dist && vite build --base=${VITE_BASE_PATH:-/}",
     "preview": "vite preview"
   },
   "dependencies": {
-    "cosmq-js": "0.0.8"
+    "cosmq-js": "0.1.0"
   },
   "devDependencies": {
     "babel-plugin-transform-equal-chain": "1.0.5",
-    "babel-preset-cosmq": "0.0.8",
+    "babel-preset-cosmq": "0.1.0",
     "vite": "4.4.5",
     "vite-plugin-babel": "1.1.3"
   }
